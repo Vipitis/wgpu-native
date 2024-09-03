@@ -86,7 +86,15 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
 
   struct demo demo = {0};
-  demo.instance = wgpuCreateInstance(NULL);
+
+  WGPUInstanceExtras instanceExtras = { 0 };
+  instanceExtras.chain.sType = (WGPUSType)WGPUSType_InstanceExtras;
+  instanceExtras.backends = WGPUInstanceBackend_DX12;
+
+  WGPUInstanceDescriptor instanceDescriptor = { 0 };
+  instanceDescriptor.nextInChain = &instanceExtras.chain;
+
+  demo.instance = wgpuCreateInstance(&instanceDescriptor);
   assert(demo.instance);
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
