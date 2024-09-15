@@ -175,15 +175,6 @@ pub extern "C" fn wgpuSamplerSetLabel(
 }
 
 #[no_mangle]
-pub extern "C" fn wgpuShaderModuleGetCompilationInfo(
-    _shader_module: native::WGPUShaderModule,
-    _callback: native::WGPUShaderModuleGetCompilationInfoCallback,
-    _userdata: *mut ::std::os::raw::c_void,
-) {
-    unimplemented!();
-}
-
-#[no_mangle]
 pub extern "C" fn wgpuShaderModuleSetLabel(
     _shader_module: native::WGPUShaderModule,
     _label: *const ::std::os::raw::c_char,

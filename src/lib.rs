@@ -3769,6 +3769,31 @@ pub unsafe extern "C" fn wgpuShaderModuleRelease(shader_module: native::WGPUShad
     Arc::decrement_strong_count(shader_module);
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn wgpuShaderModuleGetCompilationInfo(
+    shader_module: native::WGPUShaderModule,
+    callback: native::WGPUShaderModuleGetCompilationInfoCallback,
+    userdata: *mut ::std::os::raw::c_void,
+) {
+    assert!(!shader_module.is_null(), "invalid shader module");
+    let (shader_module_id, context) = {
+        let shader_module  = shader_module.as_ref().expect("invalid shader module");
+        (shader_module.id, &shader_module.context)
+    };
+    let callback = callback.expect("invalid callback");
+
+    
+    let result = gfx_select!(shader_module_id => context.shader_module_get_compilation_info(shader_module_id));
+    let info: native::WGPUCompilationInfo = native::WGPUCompilationInfo {
+        nextInChain: std::ptr::null_mut(),
+        messageCount: result.messages.len(),
+        messages: result.messages.as_ptr(),
+    };
+    
+    callback(native::WGPUCompilationInfoRequestStatus_Success, &info, userdata);
+}
+
+
 // Surface methods
 
 #[no_mangle]

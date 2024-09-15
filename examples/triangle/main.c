@@ -77,6 +77,17 @@ static void handle_glfw_framebuffer_size(GLFWwindow *window, int width,
   wgpuSurfaceConfigure(demo->surface, &demo->config);
 }
 
+static void handle_compilation_info(WGPUCompilationInfoRequestStatus status,
+                                        WGPUCompilationInfo *info, void *userdata) {
+      if (status == WGPUCompilationInfoRequestStatus_Success) {
+        printf(LOG_PREFIX " get_compilation_info success=");
+      } else {
+        printf(LOG_PREFIX " get_compilation_info status=%#.8x\n", status);
+      }
+    };
+
+
+
 int main(int argc, char *argv[]) {
   UNUSED(argc)
   UNUSED(argv)
@@ -199,6 +210,10 @@ int main(int argc, char *argv[]) {
   WGPUShaderModule shader_module =
       frmwrk_load_shader_module(demo.device, "shader.wgsl");
   assert(shader_module);
+
+  // test compilaiton info
+  wgpuShaderModuleGetCompilationInfo(shader_module, handle_compilation_info, NULL);
+
 
   WGPUPipelineLayout pipeline_layout = wgpuDeviceCreatePipelineLayout(
       demo.device, &(const WGPUPipelineLayoutDescriptor){
