@@ -88,7 +88,31 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
 
   struct demo demo = {0};
-  demo.instance = wgpuCreateInstance(NULL);
+
+  // hard coded paths because dxc isn't packaged: https://github.com/gfx-rs/wgpu/blob/f35cf942af1a3bb6f48aa9185f4d2bcee809f814/wgpu-types/src/instance.rs#L389
+  // changes post v25: https://github.com/gfx-rs/wgpu/pull/7566
+  const char* dxil_path = "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\dxil.dll";
+  const char* dxc_path = "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\dxcompiler.dll";
+  // overwrite the backend to be D3D12! and use Dxc with never shader model?
+  WGPUInstanceExtras instanceExtras = { 0 };
+  instanceExtras.chain.sType = (WGPUSType)WGPUSType_InstanceExtras;
+  instanceExtras.backends = WGPUInstanceBackend_DX12;
+  instanceExtras.dx12ShaderCompiler = WGPUDx12Compiler_Dxc;
+  instanceExtras.dxilPath = (WGPUStringView){
+      .data = dxil_path,
+      .length = strlen(dxil_path),
+  };
+  instanceExtras.dxcPath = (WGPUStringView){
+      .data = dxc_path,
+      .length = strlen(dxc_path),
+  };
+  instanceExtras.dxcMaxShaderModel = WGPUDxcMaxShaderModel_V6_7;
+  instanceExtras.flags = WGPUInstanceFlag_Debug; // doesn't seem to do anything -.-
+
+  WGPUInstanceDescriptor instanceDescriptor = { 0 };
+  instanceDescriptor.nextInChain = &instanceExtras.chain;
+
+  demo.instance = wgpuCreateInstance(&instanceDescriptor);
   assert(demo.instance);
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
