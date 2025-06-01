@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
   // overwrite the backend to be D3D12! and use Dxc with never shader model?
   WGPUInstanceExtras instanceExtras = { 0 };
   instanceExtras.chain.sType = (WGPUSType)WGPUSType_InstanceExtras;
-  instanceExtras.backends = WGPUInstanceBackend_DX12;
+  instanceExtras.backends = WGPUInstanceBackend_Vulkan;
   instanceExtras.dx12ShaderCompiler = WGPUDx12Compiler_Dxc;
   instanceExtras.dxilPath = (WGPUStringView){
       .data = dxil_path,

@@ -43,8 +43,13 @@ int main(int argc, char *argv[]) {
   WGPUInstance instance = wgpuCreateInstance(NULL);
   assert(instance);
 
+
+  const WGPURequestAdapterOptions options = { 
+    .backendType = WGPUBackendType_D3D12,
+  };
+
   WGPUAdapter adapter = NULL;
-  wgpuInstanceRequestAdapter(instance, NULL,
+  wgpuInstanceRequestAdapter(instance, &options,
                              (const WGPURequestAdapterCallbackInfo){
                                  .callback = handle_request_adapter,
                                  .userdata1 = &adapter
@@ -56,7 +61,7 @@ int main(int argc, char *argv[]) {
           {
               .sType = WGPUSType_NativeLimits,
           },
-      .maxPushConstantSize = 0,
+      .maxPushConstantSize = 128,
   };
   WGPULimits supported_limits = {
       .nextInChain = &supported_limits_extras.chain,
