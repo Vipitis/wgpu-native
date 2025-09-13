@@ -91,13 +91,15 @@ int main(int argc, char *argv[]) {
 
   // hard coded paths because dxc isn't packaged: https://github.com/gfx-rs/wgpu/blob/f35cf942af1a3bb6f48aa9185f4d2bcee809f814/wgpu-types/src/instance.rs#L389
   // changes post v25: https://github.com/gfx-rs/wgpu/pull/7566
-  const char* dxil_path = "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\dxil.dll";
-  const char* dxc_path = "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\dxcompiler.dll";
+  const char* dxil_path = "D:\\Dokumente\\Uni_OFFLINE\\SoSe2024\\Thesis\\wgpu-py\\wgpu\\resources\\dxil.dll";
+  const char* dxc_path = "D:\\Dokumente\\Uni_OFFLINE\\SoSe2024\\Thesis\\wgpu-py\\wgpu\\resources\\dxcompiler.dll";
   // overwrite the backend to be D3D12! and use Dxc with never shader model?
   WGPUInstanceExtras instanceExtras = { 0 };
   instanceExtras.chain.sType = (WGPUSType)WGPUSType_InstanceExtras;
-  instanceExtras.backends = WGPUInstanceBackend_Vulkan;
-  instanceExtras.dx12ShaderCompiler = WGPUDx12Compiler_Dxc;
+  instanceExtras.backends = WGPUInstanceBackend_DX12;
+  instanceExtras.dx12ShaderCompiler = WGPUDx12Compiler_Dxc; //Ps6_5 but no debug info/source :&( TODO: try debug markers in general?
+  // instanceExtras.dx12ShaderCompiler = WGPUDx12Compiler_Fxc; // this one works (shows the source in RenderDoc, the HLSL in IGPA), ps_51
+
   instanceExtras.dxilPath = (WGPUStringView){
       .data = dxil_path,
       .length = strlen(dxil_path),
