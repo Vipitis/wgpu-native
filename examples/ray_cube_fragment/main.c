@@ -40,11 +40,15 @@ Vertex vertex_data[] = {
     // bottom (0, 0, -1)...
 };
 
+uint32_t vertex_count = 4;
+
 // TODO: vertex_data as like a array of Vertex?
 
 uint16_t index_data[] = {
     0, 1, 2, 2, 3, 0, // top
 };
+
+uint32_t index_count = 6;
 // TODO: index_data
 
 // TODO uniforms with view and projection? (maybe I just do a cube example normally for now?)
@@ -229,7 +233,8 @@ int main(int argc, char *argv[]) {
     .experimentalFeatures = true,
   };
 
-  // TODO Limits with native extras for max_acceleration_structures_per_shader_stage, max_tlas_instance_count?
+  // do we need to implement max_blas_geometry_count, max_tlas_instance_count and max_blas_primitive_count
+  // from the using_minimum_supported_acceleration_structure_values() helper?
 
   WGPUNativeLimits limits_extras = {
     .chain = {
@@ -265,6 +270,27 @@ int main(int argc, char *argv[]) {
 
   WGPUQueue queue = wgpuDeviceGetQueue(demo.device);
   assert(queue);
+
+  // frome the texture_arrays/main.c
+  WGPUBuffer vertex_buf = frmwrk_device_create_buffer_init(
+      demo.device, &(const frmwrk_buffer_init_descriptor){
+                       .label = "vertex_bufr",
+                       .content = (void *)vertex_data,
+                       .content_size = sizeof(vertex_data),
+                       .usage = WGPUBufferUsage_Vertex,
+                   });
+  assert(vertex_buf);
+
+  WGPUBuffer index_buf = frmwrk_device_create_buffer_init(
+      demo.device, &(const frmwrk_buffer_init_descriptor){
+                       .label = "index_buf",
+                       .content = (void *)index_data,
+                       .content_size = sizeof(index_data),
+                       .usage = WGPUBufferUsage_Index,
+                   });
+  assert(index_buf);
+
+  // TODO blas geo? and create the acceleration structures using device?
 
   WGPUShaderModule shader_module =
       frmwrk_load_shader_module(demo.device, "shader.wgsl");
