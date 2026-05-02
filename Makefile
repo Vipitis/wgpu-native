@@ -205,3 +205,15 @@ example-triangle-release: examples-release
 
 run-example-triangle-release: example-triangle-release
 	cd examples/triangle && "../build/RelWithDebInfo/triangle/triangle"
+
+example-ray_cube_fragment: examples-debug
+	cd examples/build/Debug && cmake --build . --target ray_cube_fragment
+
+run-example-ray_cube_fragment: example-ray_cube_fragment
+	cd examples/ray_cube_fragment && "../build/Debug/ray_cube_fragment/ray_cube_fragment"
+
+example-ray_cube_fragment-release: examples-release
+	cd examples/build/RelWithDebInfo && cmake --build . --target ray_cube_fragment
+
+run-example-ray_cube_fragment-release: example-ray_cube_fragment-release
+	cd examples/ray_cube_fragment && "../build/RelWithDebInfo/ray_cube_fragment/ray_cube_fragment"

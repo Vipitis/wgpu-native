@@ -456,11 +456,16 @@ unsafe fn map_native_display_handle(
 pub(crate) unsafe fn map_device_descriptor<'a>(
     des: &native::WGPUDeviceDescriptor,
     base_limits: wgt::Limits,
-    _extras: Option<&native::WGPUDeviceExtras>,
+    extras: Option<&native::WGPUDeviceExtras>,
 ) -> (
     wgt::DeviceDescriptor<wgc::Label<'a>>,
     Option<UncapturedErrorCallback>,
 ) {
+
+    // should bool be public api?
+    let experimental_features = extras
+        .map(|extras| extras.experimentalFeatures != 0)
+        .unwrap_or_default();
     (
         wgt::DeviceDescriptor {
             label: string_view_into_label(des.label),
@@ -480,7 +485,12 @@ pub(crate) unsafe fn map_device_descriptor<'a>(
             // TODO(wgpu.h)
             memory_hints: Default::default(),
             trace: Default::default(),
-            experimental_features: wgt::ExperimentalFeatures::disabled(),
+
+            experimental_features: if experimental_features {
+                wgt::ExperimentalFeatures::enabled()
+            } else {
+                wgt::ExperimentalFeatures::disabled()
+            },
         },
         match des.uncapturedErrorCallbackInfo.callback {
             None => None,

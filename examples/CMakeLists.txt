@@ -36,6 +36,6 @@ add_subdirectory(immediates)
 add_subdirectory(metal_interop)
 add_subdirectory(texture_arrays)
 add_subdirectory(triangle)
-
+add_subdirectory(ray_cube_fragment)
 set(GLFW_BUILD_DOCS OFF)
 add_subdirectory(vendor/glfw)

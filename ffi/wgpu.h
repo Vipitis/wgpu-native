@@ -1182,6 +1182,10 @@ typedef struct WGPUDeviceExtras
      * An empty/undefined string view disables tracing.
      */
     WGPUStringView tracePath;
+
+    // TODO: maybe do a enum to call it enable/disable?
+    WGPUBool experimentalFeatures;
+
 } WGPUDeviceExtras;
 
 typedef struct WGPUNativeLimits
