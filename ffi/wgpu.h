@@ -910,6 +910,25 @@ static const WGPUInstanceFlag WGPUInstanceFlag_AdvancedDebugging = 1 << 26;
 static const WGPUInstanceFlag WGPUInstanceFlag_WithEnv = 1 << 27;
 static const WGPUInstanceFlag WGPUInstanceFlag_Force32 = 0x7FFFFFFF;
 
+// TODO docs from https://docs.rs/wgpu-types/latest/wgpu_types/struct.AccelerationStructureGeometryFlags.html
+typedef WGPUFlags WGPUAccelerationStructureGeometryFlags;
+static const WGPUAccelerationStructureGeometryFlags WGPUAccelerationStructureGeometryFlag_None = 0x00000000; // is this required?
+static const WGPUAccelerationStructureGeometryFlags WGPUAccelerationStructureGeometryFlag_Opaque = 1 << 0;
+static const WGPUAccelerationStructureGeometryFlags WGPUAccelerationStructureGeometryFlag_NoDuplicateAnyHitInvocation = 1 << 1;
+static const WGPUAccelerationStructureGeometryFlags WGPUAccelerationStructureGeometryFlag_Force32 = 0x7FFFFFFF;
+
+// https://docs.rs/wgpu-types/latest/wgpu_types/struct.AccelerationStructureFlags.html
+typedef WGPUFlags WGPUAccelerationStructureFlags;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_None = 0x00000000;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_AllowUpdate = 1 << 0;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_AllowCompaction = 1 << 1;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_PreferFastTrace = 1 << 2;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_PreferFastBuild = 1 << 3;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_LowMemory = 1 << 4;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_UseTransform = 1 << 5;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_AllowRayHitVertexReturn = 1 << 6;
+static const WGPUAccelerationStructureFlags WGPUAccelerationStructureFlag_Force32 = 0x7FFFFFFF;
+
 typedef enum WGPUDx12Compiler
 {
     WGPUDx12Compiler_Undefined = 0x00000000,
@@ -1061,6 +1080,15 @@ typedef enum WGPUNativeDisplayHandleType
     WGPUNativeDisplayHandleType_Wayland = 0x00000003,
     WGPUNativeDisplayHandleType_Force32 = 0x7FFFFFFF
 } WGPUNativeDisplayHandleType;
+
+// https://docs.rs/wgpu-types/latest/wgpu_types/enum.AccelerationStructureUpdateMode.html
+typedef enum WGPUAccelerationStructureUpdateMode{
+    WGPUAccelerationStructureUpdateMode_None = 0x00000000,
+    WGPUAccelerationStructureUpdateMode_Build = 0x00000001,
+    WGPUAccelerationStructureUpdateMode_PreferUpdate = 0x00000002,
+    WGPUAccelerationStructureUpdateMode_Force32 = 0x7FFFFFFF
+} WGPUAccelerationStructureUpdateMode;
+
 
 /**
  * Xlib display connection data for @ref WGPUNativeDisplayHandle.
@@ -1413,6 +1441,25 @@ typedef struct WGPUPrimitiveStateExtras
     WGPUBool conservative;
 } WGPUPrimitiveStateExtras WGPU_STRUCTURE_ATTRIBUTE;
 
+// TODO docs from https://docs.rs/wgpu/latest/wgpu/type.BlasTriangleGeometrySizeDescriptor.html
+typedef struct WGPUBlasTriangleGeometrySizeDescriptor{
+    WGPUVertexFormat vertexFormat;
+    uint32_t vertexCount;
+    WGPUIndexFormat indexFormat;
+    uint32_t indexCount;
+    WGPUAccelerationStructureGeometryFlags flags;
+} WGPUBlasTriangleGeometrySizeDescriptor WGPU_STRUCTURE_ATTRIBUTE;
+
+// https://docs.rs/wgpu/latest/wgpu/type.CreateBlasDescriptor.html
+typedef struct WGPUCreateBlasDescriptor{
+    WGPUStringView label;
+    WGPUAccelerationStructureFlags flags;
+    WGPUAccelerationStructureUpdateMode updateMode;
+} WGPUCreateBlasDescriptor WGPU_STRUCTURE_ATTRIBUTE;
+
+// can we just handle these objects as pointers?
+typedef void (*WGPUBlas);
+
 typedef void (*WGPULogCallback)(WGPULogLevel level, WGPUStringView message, void *userdata);
 
 typedef enum WGPUNativeTextureFormat
@@ -1533,6 +1580,8 @@ extern "C"
     // Returns true if the capture was successfully started, or false if it failed to start or is not supported on the current platform.
     WGPUBool wgpuDeviceStartGraphicsDebuggerCapture(WGPUDevice device);
     void wgpuDeviceStopGraphicsDebuggerCapture(WGPUDevice device);
+
+    WGPUBlas wgpuDeviceCreateBlas(WGPUDevice device, WGPUCreateBlasDescriptor const *descriptor, WGPUBlasTriangleGeometrySizeDescriptor const *sizes);
 
 #ifdef __cplusplus
 } // extern "C"
