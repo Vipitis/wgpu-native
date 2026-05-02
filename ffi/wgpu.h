@@ -1215,6 +1215,10 @@ typedef struct WGPUNativeLimits
      * The maximum number of views that can be used in multiview rendering.
      */
     uint32_t maxMultiviewViewCount;
+    
+    // TODO doc
+    uint32_t maxAccelerationStructuresPerShaderStage;
+
 } WGPUNativeLimits;
 
 #define WGPU_NATIVE_LIMITS_INIT _wgpu_MAKE_INIT_STRUCT(WGPUNativeLimits, { \

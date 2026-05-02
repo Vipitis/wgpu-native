@@ -47,6 +47,7 @@ uint16_t index_data[] = {
 };
 // TODO: index_data
 
+// TODO uniforms with view and projection? (maybe I just do a cube example normally for now?)
 
 
 static void handle_request_adapter(WGPURequestAdapterStatus status,
@@ -228,15 +229,31 @@ int main(int argc, char *argv[]) {
     .experimentalFeatures = true,
   };
 
+  // TODO Limits with native extras for max_acceleration_structures_per_shader_stage, max_tlas_instance_count?
+
+  WGPUNativeLimits limits_extras = {
+    .chain = {
+        .sType = WGPUSType_NativeLimits,
+    },
+    .maxAccelerationStructuresPerShaderStage = 1,
+  };
+
+  WGPULimits limits = {
+    .nextInChain = &limits_extras.chain,
+  };
+
+  wgpuAdapterGetLimits(demo.adapter, &limits);
+
   WGPUFeatureName requiredFeatures[] = {
     WGPUNativeFeature_RayQuery,
   };
 
   WGPUDeviceDescriptor device_desc = {
+    .nextInChain = (const WGPUChainedStruct *)&device_extras,
     .label = {"rt_device", WGPU_STRLEN},
     .requiredFeatures = requiredFeatures,
     .requiredFeatureCount = 1,
-    .nextInChain = (const WGPUChainedStruct *)&device_extras,
+    .requiredLimits = &limits,
   };
 
   wgpuAdapterRequestDevice(demo.adapter, &device_desc, 

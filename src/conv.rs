@@ -582,6 +582,8 @@ pub fn write_limits_struct(wgt_limits: wgt::Limits, limits: &mut native::WGPULim
             (*native_limits).maxBindingArraySamplerElementsPerShaderStage =
                 wgt_limits.max_binding_array_sampler_elements_per_shader_stage;
             (*native_limits).maxMultiviewViewCount = wgt_limits.max_multiview_view_count;
+            (*native_limits).maxAccelerationStructuresPerShaderStage =
+                wgt_limits.max_acceleration_structures_per_shader_stage;
         }
     };
 }
@@ -706,6 +708,10 @@ pub fn map_required_limits(
         }
         if limits.maxMultiviewViewCount != native::WGPU_LIMIT_U32_UNDEFINED {
             wgt_limits.max_multiview_view_count = limits.maxMultiviewViewCount;
+        }
+        if limits.maxAccelerationStructuresPerShaderStage != native::WGPU_LIMIT_U32_UNDEFINED {
+            wgt_limits.max_acceleration_structures_per_shader_stage =
+                limits.maxAccelerationStructuresPerShaderStage;
         }
     }
     wgt_limits
