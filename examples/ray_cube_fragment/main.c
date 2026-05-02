@@ -26,19 +26,19 @@ struct demo {
   WGPUSurfaceConfiguration config;
 };
 
-struct Vertex {
+typedef struct {
   float position[3];
   float text_coord[2];
-};
+} Vertex;
 
-// Vertex vertex_data[] = {
-//     // top (0,0,1)
-//     {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-//     {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f}},
-//     {{ 1.0f,  1.0f,  1.0f}, {1.0f, 1.0f}},
-//     {{-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f}},
-//     // bottom (0, 0, -1)...
-// };
+Vertex vertex_data[] = {
+    // top (0,0,1)
+    {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+    {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f}},
+    {{ 1.0f,  1.0f,  1.0f}, {1.0f, 1.0f}},
+    {{-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f}},
+    // bottom (0, 0, -1)...
+};
 
 // TODO: vertex_data as like a array of Vertex?
 
@@ -253,12 +253,6 @@ int main(int argc, char *argv[]) {
       frmwrk_load_shader_module(demo.device, "shader.wgsl");
   assert(shader_module);
 
-  WGPUPipelineLayout pipeline_layout = wgpuDeviceCreatePipelineLayout(
-      demo.device, &(const WGPUPipelineLayoutDescriptor){
-                       .label = {"pipeline_layout", WGPU_STRLEN},
-                   });
-  assert(pipeline_layout);
-
   WGPUSurfaceCapabilities surface_capabilities = {0};
   wgpuSurfaceGetCapabilities(demo.surface, demo.adapter, &surface_capabilities);
 
@@ -266,7 +260,7 @@ int main(int argc, char *argv[]) {
       demo.device,
       &(const WGPURenderPipelineDescriptor){
           .label = {"render_pipeline", WGPU_STRLEN},
-          .layout = pipeline_layout,
+          .layout = NULL,
           .vertex =
               (const WGPUVertexState){
                   .module = shader_module,
@@ -296,6 +290,30 @@ int main(int argc, char *argv[]) {
               },
       });
   assert(render_pipeline);
+
+  WGPUBindGroupLayout bind_group_layout = wgpuRenderPipelineGetBindGroupLayout(render_pipeline, 0);
+  assert(bind_group_layout);
+
+  WGPUBindGroupDescriptor bind_group_desc = {
+    .label = {"bind_group", WGPU_STRLEN},
+    .layout = bind_group_layout,
+    .entryCount = 0,
+    .entries = (const WGPUBindGroupEntry[]){
+        // (const WGPUBindGroupEntry){
+        //     .binding = 0,
+        //     .buffer = NULL, // TODO: uniform buffer?
+        // },
+        // (const WGPUBindGroupEntry){
+        //     .binding = 1,
+        //     // TODO: TLAS?
+        // }
+    }
+  };
+
+  WGPUBindGroup bind_group = wgpuDeviceCreateBindGroup(
+      demo.device,
+      &bind_group_desc
+  );
 
   demo.config = (const WGPUSurfaceConfiguration){
       .device = demo.device,
@@ -358,6 +376,8 @@ int main(int argc, char *argv[]) {
                      });
     assert(command_encoder);
 
+    // TODO: build TLAS
+
     WGPURenderPassEncoder render_pass_encoder =
         wgpuCommandEncoderBeginRenderPass(
             command_encoder,
@@ -404,7 +424,7 @@ int main(int argc, char *argv[]) {
   }
 
   wgpuRenderPipelineRelease(render_pipeline);
-  wgpuPipelineLayoutRelease(pipeline_layout);
+//   wgpuPipelineLayoutRelease(pipeline_layout);
   wgpuShaderModuleRelease(shader_module);
   wgpuSurfaceCapabilitiesFreeMembers(surface_capabilities);
   wgpuQueueRelease(queue);
