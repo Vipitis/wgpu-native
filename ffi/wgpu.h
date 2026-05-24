@@ -1450,6 +1450,23 @@ typedef struct WGPUBlasTriangleGeometrySizeDescriptor{
     WGPUAccelerationStructureGeometryFlags flags;
 } WGPUBlasTriangleGeometrySizeDescriptor WGPU_STRUCTURE_ATTRIBUTE;
 
+// TODO: move to the other enums I think
+// for a tagged union, will gain AABBs soon.
+typedef enum WGPUBlasGeometryType
+{
+    WGPUBlasGeometryType_Triangles = 0x00000001,
+    WGPUBlasGeometryType_Force32 = 0x7FFFFFFF
+} WGPUBlasGeometryType WGPU_ENUM_ATTRIBUTE;
+
+// https://docs.rs/wgpu/latest/wgpu/type.BlasGeometrySizeDescriptors.html
+typedef struct WGPUBlasGeometrySizeDescriptors{
+    size_t triangleCount; // API diff for C I believe
+    WGPUBlasGeometryType type;
+    union {
+        WGPUBlasTriangleGeometrySizeDescriptor const* triangles;
+    } data;
+} WGPUBlasGeometrySizeDescriptors WGPU_STRUCTURE_ATTRIBUTE;
+
 // https://docs.rs/wgpu/latest/wgpu/type.CreateBlasDescriptor.html
 typedef struct WGPUCreateBlasDescriptor{
     WGPUStringView label;
@@ -1581,7 +1598,7 @@ extern "C"
     WGPUBool wgpuDeviceStartGraphicsDebuggerCapture(WGPUDevice device);
     void wgpuDeviceStopGraphicsDebuggerCapture(WGPUDevice device);
 
-    WGPUBlas wgpuDeviceCreateBlas(WGPUDevice device, WGPUCreateBlasDescriptor const *descriptor, WGPUBlasTriangleGeometrySizeDescriptor const *sizes);
+    WGPUBlas wgpuDeviceCreateBlas(WGPUDevice device, WGPUCreateBlasDescriptor const *descriptor, WGPUBlasGeometrySizeDescriptors const *sizes);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -395,6 +395,15 @@ impl Drop for WGPUTextureViewImpl {
     }
 }
 
+
+pub struct WGPUBlasImpl {
+    context: Arc<Context>,
+    id: id::BlasId,
+    handle: Option<u64>,
+}
+
+
+
 const NULL_FUTURE: native::WGPUFuture = native::WGPUFuture { id: 0 };
 const EMPTY_STRING: native::WGPUStringView = native::WGPUStringView {
     length: 0,
@@ -2570,6 +2579,67 @@ pub unsafe extern "C" fn wgpuDeviceStopGraphicsDebuggerCapture(device: native::W
 
     context.device_stop_graphics_debugger_capture(device_id)
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuDeviceCreateBlas(
+    device: native::WGPUDevice,
+    descriptor: Option<&native::WGPUCreateBlasDescriptor>,
+    sizes: Option<&native::WGPUBlasGeometrySizeDescriptors>
+) -> native::WGPUBlas {
+    let (device_id, context) = {
+        let device = device.as_ref().expect("invalid device");
+        (device.id, &device.context)
+    };
+
+    let desc = match descriptor {
+        Some(descriptor ) => wgc::resource::BlasDescriptor{
+            label: string_view_into_label(descriptor.label),
+            flags: wgt::AccelerationStructureFlags::from_bits(descriptor.flags as u8).unwrap(),
+            update_mode: match descriptor.updateMode {
+                native::WGPUAccelerationStructureUpdateMode_Build => wgt::AccelerationStructureUpdateMode::Build,
+                native::WGPUAccelerationStructureUpdateMode_PreferUpdate => wgt::AccelerationStructureUpdateMode::PreferUpdate,
+                _ => panic!("invalid update mode for BLAS descriptor"), // ??
+            }
+        },
+        None => panic!("BLAS descriptor is required")
+    };
+
+
+    // should this be a map helper in conv.rs?
+    let sizes_desc = match sizes {
+        Some(sizes) => match sizes.type_ {
+            native::WGPUBlasGeometryType_Triangles => {
+                let triangles = make_slice(sizes.data.triangles, sizes.triangleCount)
+                    .iter()
+                    .map(|triangle| wgt::BlasTriangleGeometrySizeDescriptor{
+                        vertex_format: conv::map_vertex_format(triangle.vertexFormat).unwrap(),
+                        vertex_count: triangle.vertexCount,
+                        index_format: Some(conv::map_index_format(triangle.indexFormat).unwrap()),
+                        index_count: Some(triangle.indexCount),
+                        flags: wgt::AccelerationStructureGeometryFlags::from_bits(triangle.flags as u8).unwrap(),
+                    })
+                    .collect::<Vec<_>>();
+
+                wgt::BlasGeometrySizeDescriptors::Triangles{
+                    descriptors: triangles
+                }
+            }
+            _ => panic!("invalid geometry type for blas geometry size descriptors"),
+        },
+        None => panic!("BLAS geometry size descriptors are required")
+    };
+
+    let (blas_id, handle, error) =  context.device_create_blas(device_id, &desc, sizes_desc, None);
+
+    // TODO: error sink?
+    Arc::into_raw(Arc::new(WGPUBlasImpl {
+        context: context.clone(),
+        id: blas_id,
+        handle,
+    }))
+}
+
+
 
 #[no_mangle]
 pub unsafe extern "C" fn wgpuSupportedFeaturesFreeMembers(

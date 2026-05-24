@@ -290,20 +290,30 @@ int main(int argc, char *argv[]) {
                    });
   assert(index_buf);
 
-  WGPUBlasTriangleGeometrySizeDescriptor blas_geometry_size_desc = {
+  WGPUBlasTriangleGeometrySizeDescriptor blas_geometry_triangle_size_desc = {
     .vertexFormat = WGPUVertexFormat_Float32x3,
     .vertexCount = vertex_count,
     .indexFormat = WGPUIndexFormat_Uint16,
     .indexCount = index_count,
     .flags = WGPUAccelerationStructureGeometryFlag_Opaque,
   };
-  // TODO blas geo? and create the acceleration structures using device?
 
-  WGPUBlas blas = wgpuDeviceCreateBlas(demo.device, &(const WGPUCreateBlasDescriptor){
-    .label = {"blas", WGPU_STRLEN},
-    .flags = WGPUAccelerationStructureFlag_PreferFastTrace,
-    .updateMode = WGPUAccelerationStructureUpdateMode_Build,
-  }, &blas_geometry_size_desc);
+  // so this holds multiple triangles internally? (but no clue how many?)
+  WGPUBlasGeometrySizeDescriptors blas_geometry_size_desc = {
+    .triangleCount = 2, // TODO: update the value once we have the full cube.
+    .type = WGPUBlasGeometryType_Triangles,
+    .geometry.triangles = &blas_geometry_triangle_size_desc,
+  };
+
+  WGPUBlas blas = wgpuDeviceCreateBlas(
+    demo.device,
+    &(const WGPUCreateBlasDescriptor){
+      .label = {"blas", WGPU_STRLEN},
+      .flags = WGPUAccelerationStructureFlag_PreferFastTrace,
+      .updateMode = WGPUAccelerationStructureUpdateMode_Build,
+    },
+    &blas_geometry_size_desc
+  );
 
   WGPUShaderModule shader_module =
       frmwrk_load_shader_module(demo.device, "shader.wgsl");
